@@ -1,0 +1,2 @@
+Create class based programming intead of hapahazard functions ):
+figure out how to remove Data_Visualization from main directory

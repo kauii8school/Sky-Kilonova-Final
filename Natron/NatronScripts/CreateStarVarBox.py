@@ -1,0 +1,14 @@
+timeText = '2d 00h'
+skyFileName = "frame_152"
+backgroundFileName = "StatueOfLiberty4"
+plotFileName = "Plot152"
+mixValue = 0.5
+includeText = True
+includeStar = True
+includePlot = False
+staticBackground = False
+card1AxisTranslate = 0
+card2AxisTranslate = -0.0115
+xText = 540
+yText = 1070.0
+fileDimensions = '719x1080'

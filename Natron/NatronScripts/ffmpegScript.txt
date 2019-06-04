@@ -1,0 +1,39 @@
+ffmpeg \
+-loop 1 -t 5 -i Image000.png \
+-loop 1 -t 5 -i Image001.png \
+-loop 1 -t 5 -i Image002.png \
+-loop 1 -t 5 -i Image003.png \
+-loop 1 -t 5 -i Image004.png \
+-loop 1 -t 5 -i Image005.png \
+-loop 1 -t 5 -i Image006.png \
+-filter_complex \
+"[0:v][v0];  \
+ [1:v]fade=t=in:st=0:d=1[v1]; \
+ [2:v]fade=t=in:st=0:d=1[v2]; \
+ [3:v]fade=t=in:st=0:d=1[v3]; \
+ [4:v]fade=t=in:st=0:d=1[v4]; \
+ [5:v]fade=t=in:st=0:d=1[v5]; \
+ [6:v]fade=t=in:st=0:d=1[v6]; \
+ [v0][v1][v2][v3][v4][v5][v6]concat=n=7:v=1:a=0,format=yuv420p[v]" -map "[v]" out.mp4
+
+ffmpeg \
+-loop 1 -t 2 -i Image000.png \
+-loop 1 -t 2 -i Image001.png \
+-loop 1 -t 2 -i Image002.png \
+-loop 1 -t 2 -i Image003.png \
+-loop 1 -t 2 -i Image004.png \
+-loop 1 -t 2 -i Image005.png \
+-loop 1 -t 2 -i Image006.png \
+-filter_complex \
+"[0:v]fade=t=out:st=2:d=1[v0]; \
+ [1:v]fade=t=in:st=0:d=1: alpha=1,fade=t=out:st=4:d=1: alpha=0[v1]; \
+ [2:v]fade=t=in:st=0:d=1: alpha=1,fade=t=out:st=4:d=1: alpha=0[v2]; \
+ [3:v]fade=t=in:st=0:d=1: alpha=1,fade=t=out:st=4:d=1: alpha=0[v3]; \
+ [4:v]fade=t=in:st=0:d=1: alpha=1,fade=t=out:st=4:d=1: alpha=0[v4]; \
+ [5:v]fade=t=in:st=0:d=1: alpha=1,fade=t=out:st=4:d=1: alpha=0[v5]; \
+ [6:v]fade=t=in:st=0:d=1: alpha=1,fade=t=out:st=4:d=1: alpha=0[v6]; \
+ [v0][v1][v2][v3][v4][v5][v6]concat=n=7:v=1:a=0,format=yuv420p[v]" -map "[v]" out.mp4
+
+ ffmpeg -i Image%03d.png -f concat -r 1/2 -crf 20 -vf fps=8,format=yuv420p video.mp4
+ ffmpeg -framerate .5 -pix_fmt yuv420p -i Image%03d.png Video.mp4
+ ffmpeg -framerate .5 -i Image%03d.png -r 2 -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" -pix_fmt yuv420p video.mp4

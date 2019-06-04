@@ -1,0 +1,125 @@
+Manhattan Settings:
+Create Video:
+
+import subprocess
+import sys
+sys.path.insert(0, "/home/n/Documents/Research/GW170817-Milky-Way/DataVisualization/Graphs")
+sys.path.insert(0, "/home/n/Documents/Research/GW170817-Milky-Way/Dynamic Range/Data")
+from GraphicalFunctions import *
+from GrayScale import camResponse
+from Star import GW170817
+from Tracking import findMarker
+import random
+#Note in order to not have this cluttered you MUST run this file's working directory to : /home/user/Documents/Research/GW170817-Milky-Way/Natron/NatronScriptsr
+
+#PARAMS
+shutterSpeed = 1 #Second
+
+def photometryToNatronTapperness(phot, shutterSpeed):
+    return .3 + phot * shutterSpeed  * 162.2341235123333
+
+def photometryToNatronBrightness(phot):
+    return 100
+
+def photometryToBrightnesses(phot, shutterSpeed):
+    tapperness = .3 + phot * shutterSpeed  * 162.2341235123333
+    brightness = (phot * 70000)
+    print(phot * 7000)
+    causticGhostSize = phot * 3000 + random.uniform(-1, 1)
+    globalSize = .05
+    mirisSize = phot * 5700 + random.uniform(-2, 2)
+    mixValue = .5
+    if mirisSize < 0:
+        mirisSize = 0
+
+    if causticGhostSize < 0:
+        causticGhostSize = 0
+
+    return tapperness, brightness, causticGhostSize, globalSize, mirisSize, mixValue
+
+
+sunRayCount = 15
+for i in range(0, len(GW170817.interpolatedColorList)):
+    #rgb = tintRGB((rgb), 1)
+    rgb = GW170817.interpolatedColorList[i]
+    apMag = float(GW170817.interpolatedBandDict["V"][1][i])
+    print(i)
+
+    varboxFile = open("/home/n/Documents/Research/GW170817-Milky-Way/Natron/natron-plugins/Lens_Flare_Presets/Flare_ScifiLite/VarBox.py", "w")
+    r = str(rgb[0])
+    g = str(rgb[1])
+    b = str(rgb[2])
+
+    #Finding position of merger
+    #posX, posY = findMarker(i)
+
+    #Brightness vars
+    sunHardness = .01 #Controlls how wide sun is 
+    illuminance = apMagToIlluminance(apMag)
+    sunTapperness = photometryToNatronTapperness(illuminance, shutterSpeed)
+    sunRayCount = sunRayCount + random.randint(-1, 1)
+    sunRayDepth = .123
+    starBrightness = photometryToNatronBrightness(illuminance)
+    time = GW170817.interpolatedTimeList[i]
+    timeSinceMerger = timeMJDToSinceEvent(57982.36180556, time)
+    staticBackground = True
+    backgroundFileName = "Manhattan2"
+    plotFileName = "Plot{0:03d}".format(i)
+    includeCausticGhosts = True
+    includeText = True
+    causticGhostSize = 8
+    globalSize = .05
+    mirisSize = 10
+    mixValue = .5
+    posX = 570 #921 for stellarium
+    posY = 550 #528 for stellarium
+
+    #Video vars
+    timeLimit = 7 #days
+
+    includePlot = True
+    GW170817.plotPhotometryInterpolated()
+    GW170817.pointPlotPhotometry(inputIndex = i)
+    GW170817.savePlot("/home/n/Documents/Research/GW170817-Milky-Way/Natron/ReadImages/Plots/", plotFileName, text = "(c) Gupte & Bartos 2019 |  image credit: King of Hearts / Wikimedia Commons / CC-BY-SA-3.0", xlim = (57982.36180556, 57990))
+
+    if (posX, posY) == (None, None):
+        includeStar = False
+    else:
+        includeStar = True
+
+    sunTapperness, starBrightness, causticGhostSize, globalSize, mirisSize, mixValue = photometryToBrightnesses(illuminance, shutterSpeed)
+    #print(sunTapperness, starBrightness, causticGhostSize, globalSize, mirisSize, mixValue)
+    #0.8157751891139848 100 9.969496895871496 0.05 16.848714176009818 0.5
+    filename = "/home/n/Documents/Research/GW170817-Milky-Way/Natron/WriteImages/Image{0:03}.png".format(i)
+    #Creating a varbox in Flare_ScifiLIte so that Flare_SciFiLite.py can read variables from there and use them in the video
+    varboxFile.write("globalRed = {}\n".format(r))
+    varboxFile.write("globalGreen = {}\n".format(g))
+    varboxFile.write("globalBlue =  {}\n".format(b))
+    varboxFile.write("sunHardness = {}\n".format(sunHardness))
+    varboxFile.write("sunTapperness = {}\n".format(sunTapperness))
+    varboxFile.write("starBrightness = {}\n".format(starBrightness))
+    varboxFile.write("sunRayCount = {}\n".format(sunRayCount))
+    varboxFile.write("sunRayDepth = {}\n".format(sunRayDepth))
+    varboxFile.write("includeCausticGhosts = {}\n".format(includeCausticGhosts))
+    varboxFile.write("posX =  {}\n".format(posX))
+    varboxFile.write("posY = {}\n".format(posY))
+    varboxFile.write("causticGhostSize = {}\n".format(causticGhostSize))
+    varboxFile.write("globalScale = {}\n".format(globalSize))
+    varboxFile.write("mirisSize = {}\n".format(mirisSize))
+    varboxFile.close()
+
+    #Creating a varbox for CreateStar.py
+    CreateStarVarBoxFile = open("/home/n/Documents/Research/GW170817-Milky-Way/Natron/NatronScripts/CreateStarVarBox.py", "w")
+    CreateStarVarBoxFile.write("timeText = '{}'\n".format(timeSinceMerger))
+    CreateStarVarBoxFile.write("skyFileName = \"{}\"\n".format("frame_{0:03}".format(i)))
+    CreateStarVarBoxFile.write("backgroundFileName = \"{}\"\n".format(backgroundFileName))
+    CreateStarVarBoxFile.write("plotFileName = \"{}\"\n".format(plotFileName))
+    CreateStarVarBoxFile.write("mixValue = {}\n".format(mixValue))
+    CreateStarVarBoxFile.write("includeText = {}\n".format(includeText))
+    CreateStarVarBoxFile.write("includeStar = {}\n".format(includeStar))
+    CreateStarVarBoxFile.write("includePlot = {}\n".format(includePlot))
+    CreateStarVarBoxFile.write("staticBackground = {}\n".format(staticBackground))
+    CreateStarVarBoxFile.close()
+
+    subprocess.call('ls', shell = True)
+    subprocess.call(['NatronRenderer', 'CreateStar.py', '-w', 'MyWriter', '1', filename])

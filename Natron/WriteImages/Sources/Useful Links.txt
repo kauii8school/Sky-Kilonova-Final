@@ -1,0 +1,12 @@
+How read grb json files:
+
+https://arxiv.org/pdf/1605.01054.pdf
+
+color matching function approx:
+http://jcgt.org/published/0002/02/01/paper.pdf
+
+Blackbody spectruma:
+http://www.fourmilab.ch/documents/specrend/
+
+Johnson UBVRI  Bands:
+http://www.astro.caltech.edu/~george/ay122/Bessel2005ARAA43p293.pdf
